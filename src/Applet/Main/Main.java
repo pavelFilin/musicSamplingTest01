@@ -60,6 +60,7 @@ public class Main {
             k++;
             temp = (byte) (samples[i]);
             allAudioBytes[k] = (byte) ((samples[i]) >> 8);
+            k++;
         }
         return allAudioBytes;
     }
@@ -81,7 +82,6 @@ public class Main {
                 samples[k] = temp;
                 k++;
             }
-            allAudioBytes[i] *= 1;
         }
         return samples;
     }
