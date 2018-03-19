@@ -21,10 +21,9 @@ public class Main {
 
             byte[] allAudioBytes = new byte[(int) audioInputStream.getFrameLength() * bytesPerFrame];
             audioInputStream.read(allAudioBytes);
-            int[] samples = getSamples(audioInputStream, bytesPerFrame, allAudioBytes);
-            multipleVolume(samples, 1);
-
-            allAudioBytes =  getBytesFromSamples(samples);
+            int[] samples = getSamples(allAudioBytes);
+            multipleVolume(samples, 1.1);
+            allAudioBytes = getBytesFromSamples(samples);
 
             writeTxtFile(allAudioBytes, "Mult.txt");
 
@@ -51,34 +50,54 @@ public class Main {
 
     }
 
-    private static byte[] getBytesFromSamples(int[] samples) {
-        byte[] allAudioBytes = new byte[samples.length*2];
+    public static byte[] getBytesFromSamples(int[] samples) {
+        byte[] allAudioBytes = new byte[samples.length * 4];
         int k = 0;
-        for (int i = 0; i < samples.length; i += 2) {
-            byte temp = (byte) (samples[i]);
-            allAudioBytes[k] = temp;
+        for (int i = 0; i < samples.length; i++) {
+            allAudioBytes[k] = (byte) (samples[i] >> 24);
             k++;
-            temp = (byte) (samples[i]);
-            allAudioBytes[k] = (byte) ((samples[i]) >> 8);
+            allAudioBytes[k] = (byte) (samples[i] >> 16);
+            k++;
+            allAudioBytes[k] = (byte) (samples[i] >> 8);
+            k++;
+            allAudioBytes[k] = (byte) (samples[i]);
             k++;
         }
         return allAudioBytes;
     }
 
-    private static void multipleVolume(int[] samples, double x) {
+    public static void multipleVolume(int[] samples, double x) {
         for (int i = 0; i < samples.length; i++) {
             samples[i] *= x;
         }
     }
 
-    private static int[] getSamples(AudioInputStream audioInputStream, int bytesPerFrame, byte[] allAudioBytes) {
-        int[] samples = new int[(int) audioInputStream.getFrameLength() * bytesPerFrame / 2];
+    //    public static int[] getSamples(byte[] allAudioBytes) {
+//        int[] samples = new int[allAudioBytes.length/2];
+//        int k = 0;
+//        for (int i = 0; i < allAudioBytes.length; i++) {
+//            if (i % 2 == 0 && i != 0) {
+//                int temp = allAudioBytes[i - 1];
+//                temp = temp << 8;
+//                temp += allAudioBytes[i];
+//                samples[k] = temp;
+//                k++;
+//            }
+//        }
+//        return samples;
+//    }
+    public static int[] getSamples(byte[] allAudioBytes) {
+        int[] samples = new int[allAudioBytes.length / 4];
         int k = 0;
         for (int i = 0; i < allAudioBytes.length; i++) {
-            if (i % 2 == 0 && i != 0) {
-                int temp = allAudioBytes[i - 1];
+            if (i % 4 == 0) {
+                int temp = allAudioBytes[i];
                 temp = temp << 8;
-                temp += allAudioBytes[i];
+                temp += allAudioBytes[i + 1];
+                temp <<= 8;
+                temp += allAudioBytes[i + 2];
+                temp <<= 8;
+                temp += allAudioBytes[i + 3];
                 samples[k] = temp;
                 k++;
             }
